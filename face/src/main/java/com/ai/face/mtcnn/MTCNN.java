@@ -39,7 +39,7 @@ public class MTCNN {
     private AssetManager assetManager;
     private TensorFlowInferenceInterface inferenceInterface;
 
-    MTCNN(AssetManager mgr) {
+    public MTCNN(AssetManager mgr) {
         assetManager = mgr;
         loadModel();
     }
