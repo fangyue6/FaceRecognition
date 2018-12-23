@@ -40,13 +40,17 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ai.face.mtcnn.Box;
 import com.ai.face.mtcnn.MTCNN;
 import com.ai.face.mtcnn.Utils;
 import com.ai.face.view.AutoFitTextureView;
+import com.lzy.okgo.callback.StringCallback;
+import com.lzy.okgo.model.Response;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +92,6 @@ public class CameraFragment extends Fragment {
      * ID of the current {@link CameraDevice}.
      */
     private String cameraId;
-    private ImageView imgView;
     /**
      * An {@link AutoFitTextureView} for camera preview.
      */
@@ -198,9 +201,84 @@ public class CameraFragment extends Fragment {
         return inflater.inflate(R.layout.camera_layout, container, false);
     }
 
+    private ImageView imgView;
+    private EditText name;
+    private TextView practice;
+    private TextView recgon;
+    private Bitmap regBitmap;
+
     private void initView(View view) {
         cameraView = (AutoFitTextureView) view.findViewById(R.id.camera_view);
         imgView = (ImageView) view.findViewById(R.id.img);
+        name = (EditText) view.findViewById(R.id.name);
+        practice = (TextView) view.findViewById(R.id.practice);
+        practice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reqData();
+            }
+        });
+        recgon = (TextView) view.findViewById(R.id.recgon);
+        recgon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reqRecog();
+            }
+        });
+    }
+
+    private boolean request = false;
+
+    private void reqData() {
+        if (regBitmap == null) {
+            return;
+        }
+        if (request) {
+            return;
+        }
+        request = true;
+        RequestManager.practice(getName(), Utils.bitmapToBase64(regBitmap), new StringCallback() {
+            @Override
+            public void onSuccess(Response<String> response) {
+                request = false;
+                Toast.makeText(getActivity(), response.body(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(Response<String> response) {
+                request = false;
+                Toast.makeText(getActivity(), response.body(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private boolean recog = false;
+
+    private void reqRecog() {
+        if (regBitmap == null) {
+            return;
+        }
+        if (recog) {
+            return;
+        }
+        recog = true;
+        RequestManager.recogn(getName(), Utils.bitmapToBase64(regBitmap), new StringCallback() {
+            @Override
+            public void onSuccess(Response<String> response) {
+                recog = false;
+                Toast.makeText(getActivity(), response.body(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onError(Response<String> response) {
+                recog = false;
+                Toast.makeText(getActivity(), response.body(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private String getName() {
+        return name.getText().toString().trim();
     }
 
     private MTCNN mMTCNN;
@@ -251,7 +329,7 @@ public class CameraFragment extends Fragment {
         }
         final Bitmap bm = Utils.copyBitmap(cameraView.getBitmap());
         try {
-            Vector<Box> boxes = mMTCNN.detectFaces(bm, 40);
+            final Vector<Box> boxes = mMTCNN.detectFaces(bm, 40);
             for (int i = 0; i < boxes.size(); i++) {
                 Utils.drawRect(bm, boxes.get(i).transform2Rect());
                 Utils.drawPoints(bm, boxes.get(i).landmark);
@@ -259,6 +337,9 @@ public class CameraFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    if (!boxes.isEmpty()) {
+                        regBitmap = bm;
+                    }
                     imgView.setImageBitmap(bm);
                 }
             });
@@ -676,4 +757,5 @@ public class CameraFragment extends Fragment {
                     .create();
         }
     }
+
 }

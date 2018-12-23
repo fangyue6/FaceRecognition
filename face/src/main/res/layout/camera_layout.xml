@@ -4,16 +4,48 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.ai.face.view.AutoFitTextureView
-        android:id="@+id/camera_view"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <com.ai.face.view.AutoFitTextureView
+            android:id="@+id/camera_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <EditText
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp" />
+
+    </FrameLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/practice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:text="训练"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/recgon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="80dp"
+            android:text="识别"
+            android:textSize="18sp" />
 
         <ImageView
             android:id="@+id/img"
@@ -22,5 +54,4 @@
             android:layout_gravity="right" />
 
     </FrameLayout>
-
 </LinearLayout>
