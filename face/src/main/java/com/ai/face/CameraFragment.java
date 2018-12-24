@@ -1,12 +1,13 @@
 package com.ai.face;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -227,6 +228,12 @@ public class CameraFragment extends Fragment {
         });
     }
 
+    private Dialog getDialog() {
+        ProgressDialog dialog = new ProgressDialog(getActivity());
+        dialog.setCancelable(false);
+        return dialog;
+    }
+
     private boolean request = false;
 
     private void reqData() {
@@ -237,15 +244,20 @@ public class CameraFragment extends Fragment {
             return;
         }
         request = true;
+
+        final Dialog dialog = getDialog();
+        dialog.show();
         RequestManager.practice(getName(), Utils.bitmapToBase64(regBitmap), new StringCallback() {
             @Override
             public void onSuccess(Response<String> response) {
+                dialog.dismiss();
                 request = false;
                 Toast.makeText(getActivity(), response.body(), Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onError(Response<String> response) {
+                dialog.dismiss();
                 request = false;
                 Toast.makeText(getActivity(), response.body(), Toast.LENGTH_LONG).show();
             }
@@ -262,15 +274,19 @@ public class CameraFragment extends Fragment {
             return;
         }
         recog = true;
+        final Dialog dialog = getDialog();
+        dialog.show();
         RequestManager.recogn(getName(), Utils.bitmapToBase64(regBitmap), new StringCallback() {
             @Override
             public void onSuccess(Response<String> response) {
+                dialog.dismiss();
                 recog = false;
                 Toast.makeText(getActivity(), response.body(), Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onError(Response<String> response) {
+                dialog.dismiss();
                 recog = false;
                 Toast.makeText(getActivity(), response.body(), Toast.LENGTH_LONG).show();
             }
@@ -319,7 +335,7 @@ public class CameraFragment extends Fragment {
                             classifyFrame();
                         }
                     }
-                    backgroundHandler.postDelayed(periodicClassify, 3000);
+                    backgroundHandler.post(periodicClassify);
                 }
             };
 
@@ -653,19 +669,7 @@ public class CameraFragment extends Fragment {
     }
 
     private String[] getRequiredPermissions() {
-        Activity activity = getActivity();
-        try {
-            PackageInfo info = activity.getPackageManager().getPackageInfo(activity.getPackageName(),
-                    PackageManager.GET_PERMISSIONS);
-            String[] ps = info.requestedPermissions;
-            if (ps != null && ps.length > 0) {
-                return ps;
-            } else {
-                return new String[0];
-            }
-        } catch (Exception e) {
-            return new String[0];
-        }
+        return new String[]{Manifest.permission.CAMERA};
     }
 
     /**
