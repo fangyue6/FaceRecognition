@@ -343,7 +343,8 @@ public class CameraFragment extends Fragment {
         if (getActivity() == null || cameraDevice == null) {
             return;
         }
-        final Bitmap bm = Utils.copyBitmap(cameraView.getBitmap());
+        final Bitmap cameraBm = cameraView.getBitmap();
+        final Bitmap bm = Utils.copyBitmap(cameraBm);
         try {
             final Vector<Box> boxes = mMTCNN.detectFaces(bm, 40);
             for (int i = 0; i < boxes.size(); i++) {
@@ -354,7 +355,7 @@ public class CameraFragment extends Fragment {
                 @Override
                 public void run() {
                     if (!boxes.isEmpty()) {
-                        regBitmap = bm;
+                        regBitmap = Utils.compressImage(cameraBm);
                     }
                     imgView.setImageBitmap(bm);
                 }
